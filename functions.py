@@ -5,8 +5,8 @@ import math
 
 
 # print("Function: Functions")
-# print("Release: 1.2.0")
-# print("Date: 2021-10-28")
+# print("Release: 1.3.0")
+# print("Date: 2021-11-19")
 # print("Author: Brian Neely")
 # print()
 # print()
@@ -148,3 +148,6 @@ def sizeof_fmt(num, suffix="B"):
         num /= 1024.0
     return f"{num:.1f}Yi{suffix}"
 
+
+def chunk_dataframe(df, num_rows):
+    return [df[i:i + num_rows] for i in range(0, df.shape[0], num_rows)]

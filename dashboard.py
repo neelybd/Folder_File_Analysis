@@ -63,7 +63,9 @@ app.layout = html.Div([
 def display_color(size_range):
     meta_data_size_fltrd = meta_data[meta_data['file_size_bytes_log'].between(size_range[0], size_range[1])]
     print(meta_data_size_fltrd)
-    fig = px.histogram(meta_data_size_fltrd, x='file_size_bytes_log', labels={'file_size_bytes_log': 'file_size'})
+    fig = px.histogram(meta_data_size_fltrd,
+                       x='file_size_bytes_log',
+                       labels={'file_size_bytes_log': 'Log2(File Size)'})
     return fig
 
 
