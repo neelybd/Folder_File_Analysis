@@ -2,6 +2,9 @@ import os
 import random
 import pandas as pd
 import sqlite3
+
+import pandas.io.sql
+
 from queries import *
 import time
 from selection import *
@@ -10,6 +13,7 @@ from functions import *
 from datetime import datetime
 from queries import *
 import hashlib
+from joblib import Parallel, delayed
 
 
 def ext_scan_file(file_data_df):
@@ -106,10 +110,20 @@ def meta_data_format(data):
     return meta_data
 
 
-def scan_chunk(chunk, index_func, index_ln_func, conn_func, tbl_nm_func, incmplt_tbl_nm_func):
-    # Perform extended scan
-    print("Scanning index {index_str} out of {index_ln_str}".format(index_str=str(index_func + 1),
-                                                                    index_ln_str=str(index_ln_func)))
+def scan_chunk(chunk, index_func, index_ln_func, db_path, tbl_nm_func, incmplt_tbl_nm_func):
+    # Connect to database
+    conn_func = sqlite3.connect(db_path, check_same_thread=False)
+
+    # If new percent complete, print
+    if math.floor(index_func / index_ln_func * 100) > math.floor((index_func - 1) / index_ln_func * 100):
+        # Calculate percent complete
+        prcnt_cmplt = math.floor(index_func / index_ln_func * 100)
+        print("{prcnt_cmplt_str}% complete! Scanning index {index_str}".format(prcnt_cmplt_str=str(prcnt_cmplt),
+                                                                               index_str=str(index_func + 1)))
+
+    # # Perform extended scan
+    # print("Scanning index {index_str} out of {index_ln_str}".format(index_str=str(index_func + 1),
+    #                                                                 index_ln_str=str(index_ln_func)))
 
     # Scan Files and create DataFrame
     chnk_pull_df = pd.concat(chunk.apply(ext_scan_file, axis=1).to_list())
@@ -117,21 +131,101 @@ def scan_chunk(chunk, index_func, index_ln_func, conn_func, tbl_nm_func, incmplt
     # Create full meta-data
     chnk_meta_df_func = meta_data_format(chnk_pull_df)
 
-    # Upload data to sqlite database
-    chnk_meta_df_func.to_sql(tbl_nm_func, con=conn_func, if_exists='append', index=False)
+    # Upload data to completed table, trying up to 10 times, waiting between 1 and 10 seconds randomly
+    max_trys = 25
+    for attmpt in range(0, 10):
+        try:
+            # Upload data to sqlite database
+            chnk_meta_df_func.to_sql(tbl_nm_func, con=conn_func, if_exists='append', index=False)
 
-    # Upload file_paths to temp table
+        except sqlite3.OperationalError:
+            if attmpt < max_trys - 1:
+                # This exception usually means the database is being modified, so try again in a couple seconds.
+                print("Couldn't update database for index number {index_str} - attempt number {attmpt_str}"
+                      .format(index_str=str(index_func),
+                              attmpt_str=str(attmpt + 1)))
+                time.sleep(random.randrange(100, 10000) / 100 * (1 + attmpt))
+                continue
+            else:
+                break
+
+        # Break from retry loop
+        break
+
+    # Upload file_paths to temp table, trying up to 10 times, waiting between 1 and 10 seconds randomly
     tmp_tbl_nm = "temp_table_" + str(random.randrange(0, 1000000000))
-    chnk_meta_df_func.to_sql(tmp_tbl_nm, con=conn_func, if_exists='replace', index=False)
+    max_trys = 25
+    for attmpt in range(0, 10):
+        try:
+            # Upload temp data to sqlite database
+            chnk_meta_df_func.to_sql(tmp_tbl_nm, con=conn_func, if_exists='replace', index=False)
 
-    # Delete rows from incomplete table using temp table
-    delete_row_query_run_2(conn_func, incmplt_tbl_nm_func, tmp_tbl_nm, 'file_path', 'file_path')
+        except (sqlite3.OperationalError, pandas.io.sql.DatabaseError):
+            if attmpt < max_trys - 1:
+                # This exception usually means the database is being modified, so try again in a couple seconds.
+                print("Couldn't update database for index number {index_str} - attempt number {attmpt_str}"
+                      .format(index_str=str(index_func),
+                              attmpt_str=str(attmpt)))
+                time.sleep(random.randrange(100, 10000) / 100 * (1 + attmpt))
+                continue
+            else:
+                break
 
-    # Delete temp table
-    drop_query_run_1(conn_func=conn_func, tbl_nm_delete_func=tmp_tbl_nm)
+        # Break from retry loop
+        break
+
+        # Upload delete data from incomplete table, trying up to 10 times, waiting between 1 and 10 seconds randomly
+        tmp_tbl_nm = "temp_table_" + str(random.randrange(0, 1000000000))
+        max_trys = 25
+        for attmpt in range(0, 10):
+            try:
+                # Delete rows from incomplete table using temp table
+                delete_row_query_run_2(conn_func, incmplt_tbl_nm_func, tmp_tbl_nm, 'file_path', 'file_path')
+
+                # Delete temp table
+                drop_query_run_1(conn_func=conn_func, tbl_nm_delete_func=tmp_tbl_nm)
+
+            except (sqlite3.OperationalError, pandas.io.sql.DatabaseError):
+                if attmpt < max_trys - 1:
+                    # This exception usually means the database is being modified, so try again in a couple seconds.
+                    print("Couldn't update database for index number {index_str} - attempt number {attmpt_str}"
+                          .format(index_str=str(index_func),
+                                  attmpt_str=str(attmpt)))
+                    time.sleep(random.randrange(100, 10000) / 100 * (1 + attmpt))
+                    continue
+                else:
+                    break
+
+            # Break from retry loop
+            break
+
+        # Upload drop temp table from incomplete table, trying up to 10 times, waiting between 1 and 10 seconds randomly
+        tmp_tbl_nm = "temp_table_" + str(random.randrange(0, 1000000000))
+        max_trys = 25
+        for attmpt in range(0, 10):
+            try:
+                # Delete temp table
+                drop_query_run_1(conn_func=conn_func, tbl_nm_delete_func=tmp_tbl_nm)
+
+            except (sqlite3.OperationalError, pandas.io.sql.DatabaseError):
+                if attmpt < max_trys - 1:
+                    # This exception usually means the database is being modified, so try again in a couple seconds.
+                    print("Couldn't update database for index number {index_str} - attempt number {attmpt_str}"
+                          .format(index_str=str(index_func),
+                                  attmpt_str=str(attmpt)))
+                    time.sleep(random.randrange(100, 10000) / 100 * (1 + attmpt))
+                    continue
+                else:
+                    break
+
+            # Break from retry loop
+            break
 
     # Commit Changes to Database
     conn_func.commit()
+
+    # Close connection to Database
+    conn_func.close()
 
     # Return data
     return chnk_meta_df_func
@@ -227,10 +321,22 @@ def folder_file_analysis(file_scn_pth_lst, csv_out=False, db_path='db.db', tm_bf
     # Start Timer
     start_tm = time.time()
 
-    for index, file_df_chnk in enumerate(file_lst_df_chnkd):
-        # Perform Scan and upload to database.
-        # This step scans file, uploads data to db and removes data from incomplete table
-        scan_chunk(file_df_chnk, index, index_ln, conn, cmplt_tbl_nm, incmplt_tbl_nm)
+    print(index_ln)
+
+    if not multithread:
+        for index, file_df_chnk in enumerate(file_lst_df_chnkd):
+            # Perform Scan and upload to database.
+            # This step scans file, uploads data to db and removes data from incomplete table
+            scan_chunk(file_df_chnk, index, index_ln, db_path, cmplt_tbl_nm, incmplt_tbl_nm)
+    else:
+        Parallel(n_jobs=-1, backend='threading')(delayed(scan_chunk)(file_df_chnk,
+                                                                     index,
+                                                                     index_ln,
+                                                                     db_path,
+                                                                     cmplt_tbl_nm,
+                                                                     incmplt_tbl_nm)
+                                                 for index, file_df_chnk in
+                                                 enumerate(file_lst_df_chnkd))
 
     # End Timer
     end_tm = time.time()
