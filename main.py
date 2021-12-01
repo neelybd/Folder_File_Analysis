@@ -26,4 +26,7 @@ db_path = 'db.db'
 # Set file output
 csv_out_pth = 'data_out.csv'
 
-folder_file_analysis(file_scn_pth_lst=file_scn_pth_lst, csv_out=csv_out_pth)
+# Set multithread
+multithread_tf = True
+
+folder_file_analysis(file_scn_pth_lst=file_scn_pth_lst, csv_out=csv_out_pth, multithread=multithread_tf)

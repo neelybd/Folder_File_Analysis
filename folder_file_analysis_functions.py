@@ -137,7 +137,7 @@ def scan_chunk(chunk, index_func, index_ln_func, conn_func, tbl_nm_func, incmplt
     return chnk_meta_df_func
 
 
-def folder_file_analysis(file_scn_pth_lst, csv_out=False, db_path='db.db', tm_bfr_rscn=86400):
+def folder_file_analysis(file_scn_pth_lst, csv_out=False, db_path='db.db', tm_bfr_rscn=86400, multithread=False):
     # Create db connection
     conn = sqlite3.connect(db_path)
 
@@ -211,7 +211,8 @@ def folder_file_analysis(file_scn_pth_lst, csv_out=False, db_path='db.db', tm_bf
         print()
 
     # Get list of files to scan from db
-    file_lst_df = incomplete_table_query_run_1(conn, incmplt_tbl_nm)
+    file_lst_df = query_tbl_run_1(tbl_nm=incmplt_tbl_nm,
+                                  conn_func=conn)
 
     # Chunk df into list of df
     file_lst_df_chnkd = chunk_dataframe(file_lst_df, 100)
@@ -251,8 +252,8 @@ def folder_file_analysis(file_scn_pth_lst, csv_out=False, db_path='db.db', tm_bf
                               crnt_tm=time.time())
 
     # Get output of latest scan
-    data_out = pd.read_sql_table(table_name=output_view_nm,
-                                 con=conn)
+    data_out = query_tbl_run_1(tbl_nm=output_view_nm,
+                               conn_func=conn)
 
     # Print number of files in output dataset
     print("{num_files_str} files analyzed!".format(num_files_str=str(data_out.shape[0])))
@@ -263,6 +264,23 @@ def folder_file_analysis(file_scn_pth_lst, csv_out=False, db_path='db.db', tm_bf
     else:
         # Export DataFrame for testing
         data_out.to_csv(csv_out, index=False)
+
+    # *****Cleanup old temp tables*****
+    # Get list of tables
+    db_tbl_lst = list_of_tables(conn)
+
+    # Make holding list for temp table names
+    temp_tbl_lst = list()
+
+    # Append temp tables to list
+    for i in db_tbl_lst:
+        if i[:11] == 'temp_table_':
+            temp_tbl_lst.append(i)
+
+    # Drop tables
+    for i in temp_tbl_lst:
+        drop_query_run_1(conn_func=conn,
+                         tbl_nm_delete_func=i)
 
     # Return True for Success
     return True

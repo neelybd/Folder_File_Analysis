@@ -59,7 +59,7 @@ def dedupe_query_run_1(conn_func, tbl_nm):
     conn_func.commit()
 
 
-def incomplete_table_query_run_1(conn, tbl_nm):
+def incomplete_table_query_run_1(conn_func, tbl_nm):
     # Query table
     query = """
     select 
@@ -67,7 +67,7 @@ def incomplete_table_query_run_1(conn, tbl_nm):
     from
         "{tbl_nm_str}";
     """
-    return pd.read_sql_query(query.format(tbl_nm_str=tbl_nm), con=conn)
+    return pd.read_sql_query(query.format(tbl_nm_str=tbl_nm), con=conn_func)
 
 
 def delete_row_query_run_2(conn_func, tbl_nm_delete_func, tbl_nm_from_func, where_col_1, where_col_2):
@@ -85,7 +85,7 @@ def delete_row_query_run_2(conn_func, tbl_nm_delete_func, tbl_nm_from_func, wher
 
 def drop_query_run_1(conn_func, tbl_nm_delete_func):
     # Query to delete values from one table to another
-    query = """drop table if exists {};""".format(tbl_nm_delete_func)
+    query = """drop table if exists "{}";""".format(tbl_nm_delete_func)
 
     # return query
     conn_func.execute(query)
@@ -228,3 +228,26 @@ def create_current_view_run_1(conn_func, view_tbl_nm, cmplt_tbl_func, scn_tm_lmt
 
     # Commit Changes
     conn_func.commit()
+
+
+def query_tbl_run_1(conn_func, tbl_nm):
+    # Query table
+    query = """
+    select 
+        *
+    from
+        "{tbl_nm_str}";
+    """
+    return pd.read_sql_query(query.format(tbl_nm_str=tbl_nm), con=conn_func)
+
+
+def list_of_tables(conn_func):
+    query = """
+    SELECT 
+        name 
+    FROM 
+        sqlite_master 
+    WHERE 
+        type='table';
+    """
+    return pd.read_sql_query(query, con=conn_func)['name'].to_list()
