@@ -17,7 +17,7 @@ print()
 tm_bfr_rscn = 60 * 60 * 24
 
 # File Scan location
-file_scn_pth_lst = ['C:\\', 'H:\\']
+file_scn_pth_lst = ['H:\\']
 
 # Database location
 db_path = 'db.db'

@@ -2,9 +2,7 @@ import os
 import random
 import pandas as pd
 import sqlite3
-
 import pandas.io.sql
-
 from queries import *
 import time
 from selection import *
@@ -383,10 +381,14 @@ def folder_file_analysis(file_scn_pth_lst, csv_out=False, db_path='db.db', tm_bf
         if i[:11] == 'temp_table_':
             temp_tbl_lst.append(i)
 
-    # Drop tables
+    # Drop temp tables
     for i in temp_tbl_lst:
         drop_query_run_1(conn_func=conn,
                          tbl_nm_delete_func=i)
+
+    # Drop incomplete table, any remaining, couldn't be analyzed
+    drop_query_run_1(conn_func=conn,
+                     tbl_nm_delete_func=incmplt_tbl_nm)
 
     # Return True for Success
     return True

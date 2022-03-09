@@ -6,17 +6,18 @@ from selection import *
 from file_handling_docker import *
 from functions import *
 import dash
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc
+from dash import html
 from dash.dependencies import Input, Output
 import plotly.graph_objects as go
 import plotly.express as px
 import math
+from queries import *
 
 
 print("Program: Folder_File_Analysis_Dashboard")
-print("Release: 0.0.0")
-print("Date: 2021-11-05")
+print("Release: 1.1.0")
+print("Date: 2021-12-01")
 print("Author: Brian Neely")
 print()
 print()
@@ -24,14 +25,54 @@ print("WIP - A program that that analyzes a directory of files and folders its m
 print()
 print()
 
-# Import Data
-meta_data = open_unknown_csv('out.csv', ',')
+# View List
+output_view_nm = "Output View"
+
+# Database location
+db_path = 'db.db'
+
+# Create db connection
+conn = sqlite3.connect(db_path)
+
+# Get output of latest scan
+meta_data = query_tbl_run_1(tbl_nm=output_view_nm,
+                            conn_func=conn)
 
 # Make log of bytes
 meta_data['file_size_bytes_log'] = meta_data['file_size_bytes'].apply(lambda x: 0 if x == 0 else math.log(x, 2))
 
 # Initialize Dash
 app = dash.Dash()
+
+# Column List
+tbl_col_nm_lst = ["File Size Bytes",
+                "File Name",
+                "File Size",
+                "Age",
+                "Time Since Last Access",
+                "Last Access",
+                "Last Modify",
+                "Create"]
+
+
+# Table for files
+file_table = go.Figure(data=[go.Table(
+    header=dict(values=tbl_col_nm_lst,
+                fill_color='paleturquoise',
+                align='left'),
+    cells=dict(values=[meta_data.file_size_bytes,
+                       meta_data.file_name,
+                       meta_data.file_size,
+                       meta_data.file_age_str,
+                       meta_data.time_since_last_access_str,
+                       meta_data.last_access_time,
+                       meta_data.last_modify_time,
+                       meta_data.create_time],
+               fill_color='lavender',
+               align='left'))
+])
+
+file_table.show()
 
 # Dash Layout
 app.layout = html.Div([
@@ -78,6 +119,7 @@ def update_output(value):
 # Make Histogram
 # fig = px.histogram(meta_data, x="file_size_bytes")
 # fig.show()
+
 
 app.run_server()
 
