@@ -1,17 +1,9 @@
 import os
-import random
 import pandas as pd
 import sqlite3
 import pandas.io.sql
-from queries import *
-import time
-from selection import *
 from file_handling import *
-from functions import *
-from datetime import datetime
 from queries import *
-import hashlib
-from joblib import Parallel, delayed
 import kivy
 from kivy.app import App
 from kivy.uix.label import Label
