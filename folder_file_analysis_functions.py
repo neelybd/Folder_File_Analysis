@@ -82,7 +82,7 @@ def meta_data_format(data):
         lambda x: datetime.fromtimestamp(x).strftime('%Y-%m-%d %H:%M:%S'))
 
     # Get Last Modify Time
-    meta_data['last_modify_time'] = meta_data['last_access_time_unix'].apply(
+    meta_data['last_modify_time'] = meta_data['last_modify_time_unix'].apply(
         lambda x: datetime.fromtimestamp(x).strftime('%Y-%m-%d %H:%M:%S'))
 
     # Get Last Create/Metadata Change Time (Windows/Unix)
@@ -102,6 +102,16 @@ def meta_data_format(data):
     # Create time since last accessed
     meta_data['time_since_last_access'] = meta_data['report_time'] - meta_data['last_access_time_unix']
     meta_data['time_since_last_access_str'] = meta_data['time_since_last_access'].apply(
+        lambda x: elapsed_time_stringify(x, incld_all=False, incld_0=False))
+
+    # Create time since last modified
+    meta_data['time_since_last_modify'] = meta_data['report_time'] - meta_data['last_modify_time_unix']
+    meta_data['time_since_last_modify_str'] = meta_data['time_since_last_modify'].apply(
+        lambda x: elapsed_time_stringify(x, incld_all=False, incld_0=False))
+
+    # Create time since creation
+    meta_data['time_since_create'] = meta_data['report_time'] - meta_data['create_time_unix']
+    meta_data['time_since_create_str'] = meta_data['time_since_create'].apply(
         lambda x: elapsed_time_stringify(x, incld_all=False, incld_0=False))
 
     # Return Data
