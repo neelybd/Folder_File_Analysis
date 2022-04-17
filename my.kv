@@ -1,0 +1,126 @@
+<CustomDropDown>:
+    Button:
+        text: 'My first Item'
+        size_hint_y: None
+        height: 44
+        on_release: root.select('item1')
+    Label:
+        text: 'Unselectable item'
+        size_hint_y: None
+        height: 44
+    Button:
+        text: 'My second Item'
+        size_hint_y: None
+        height: 44
+        on_release: root.select('item2')
+
+<MyGridLayout>
+
+    time_since_last_access_fltr_lower: time_since_last_access_fltr_lower
+    time_since_last_access_fltr_upper: time_since_last_access_fltr_upper
+    file_age_fltr_lower: file_age_fltr_lower
+    file_age_fltr_upper: file_age_fltr_upper
+    last_modify_time_unix_fltr_lower: last_modify_time_unix_fltr_lower
+    last_modify_time_unix_fltr_upper: last_modify_time_unix_fltr_upper
+
+    GridLayout:
+        cols:1
+        size: root.width, root.height
+
+        GridLayout
+            cols:3
+
+            Label:
+                text: "Minimum Time Since Last Access: "
+                font_size: 28
+            TextInput:
+                id: time_since_last_access_fltr_lower
+                multiline: False
+                font_size: 28
+            Spinner:
+                id: time_since_last_access_fltr_lower_selector
+                text: 'Year'
+                values: ["Seconds", "Minutes", "Hours", "Days", "Months", "Years"]
+                on_text: root.spinner_time_type_clicked(time_since_last_access_fltr_lower_selector.text, "time_since_last_access_fltr_lower_selector")
+
+            Label:
+                text: "Maximum Time Since Last Access: "
+                font_size: 28
+            TextInput:
+                id: time_since_last_access_fltr_upper
+                multiline: False
+                font_size: 28
+            Spinner:
+                id: time_since_last_access_fltr_upper_selector
+                text: 'Year'
+                values: ["Seconds", "Minutes", "Hours", "Days", "Months", "Years"]
+                on_text: root.spinner_time_type_clicked(time_since_last_access_fltr_upper_selector.text, "time_since_last_access_fltr_upper_selector")
+
+            Label:
+                text: "Minimum File Age: "
+                font_size: 28
+            TextInput:
+                id: file_age_fltr_lower
+                multiline: False
+                font_size: 28
+            Spinner:
+                id: file_age_fltr_lower_selector
+                text: 'Year'
+                values: ["Seconds", "Minutes", "Hours", "Days", "Months", "Years"]
+                on_text: root.spinner_time_type_clicked(file_age_fltr_lower_selector.text, "file_age_fltr_lower_selector")
+
+            Label:
+                text: "Maximum File Age: "
+                font_size: 28
+            TextInput:
+                id: file_age_fltr_upper
+                multiline: False
+                font_size: 28
+            Spinner:
+                id: file_age_fltr_upper_selector
+                text: 'Year'
+                values: ["Seconds", "Minutes", "Hours", "Days", "Months", "Years"]
+                on_text: root.spinner_time_type_clicked(file_age_fltr_upper_selector.text, "file_age_fltr_upper_selector")
+
+            Label:
+                text: "Minimum Time Since Last Modify: "
+                font_size: 28
+            TextInput:
+                id: last_modify_time_unix_fltr_lower
+                multiline: False
+                font_size: 28
+            Spinner:
+                id: last_modify_time_unix_fltr_lower_selector
+                text: 'Year'
+                values: ["Seconds", "Minutes", "Hours", "Days", "Months", "Years"]
+                on_text: root.spinner_time_type_clicked(last_modify_time_unix_fltr_lower_selector.text, "last_modify_time_unix_fltr_lower_selector")
+
+            Label:
+                text: "Maximum Time Since Last Modify: "
+                font_size: 28
+            TextInput:
+                id: last_modify_time_unix_fltr_upper
+                multiline: False
+                font_size: 28
+            Spinner:
+                id: last_modify_time_unix_fltr_upper_selector
+                text: 'Year'
+                values: ["Seconds", "Minutes", "Hours", "Days", "Months", "Years"]
+                on_text: root.spinner_time_type_clicked(last_modify_time_unix_fltr_upper_selector.text, "last_modify_time_unix_fltr_upper_selector")
+
+        GridLayout
+            cols:3
+            Button:
+                text: "rescan_press"
+                font_size: 28
+                on_press: root.rescan_press()
+
+            Button:
+                text: "Submit"
+                font_size: 28
+                on_press: root.slicer_press()
+
+            Button:
+                text: "Download"
+                font_size: 28
+                on_press: root.download_press()

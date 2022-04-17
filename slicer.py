@@ -11,7 +11,9 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.dropdown import DropDown
+from kivy.uix.widget import Widget
 from kivy.base import runTouchApp
+from kivy.properties import ObjectProperty
 import pathlib
 from tkinter import filedialog as tkFileDialog
 from folder_file_analysis_functions import *
@@ -101,9 +103,17 @@ def create_sql_query(filter_tpl_lst, tbl_in):
     return query
 
 
-class MyGridLayout(GridLayout):
+class CustomDropDown(DropDown):
+    for i in range(5):
+        print(i)
+
+
+class MyGridLayout(Widget):
+
     # Initialize
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
+        super(MyGridLayout, self).__init__(*args, **kwargs)
+
         # Select database path
         self.db_path = 'db.db'
 
@@ -126,12 +136,12 @@ class MyGridLayout(GridLayout):
         self.col_height = 50
 
         # Create list of date selectors
-        self.date_selector_lst = [("Second", 1),
-                                  ("Minute", 60),
-                                  ("Hour", 60*60),
-                                  ("Day", 60*60*24),
-                                  ("Month", 60*60*24*365.25/12),
-                                  ("Year", 60*60*24*365.25)]
+        self.date_selector_lst = [("Seconds", 1),
+                                  ("Minutes", 60),
+                                  ("Hours", 60*60),
+                                  ("Days", 60*60*24),
+                                  ("Months", 60*60*24*365.25/12),
+                                  ("Years", 60*60*24*365.25)]
 
         # Create initial date selector
         self.date_selector_default = self.date_selector_lst[5][0]
@@ -144,215 +154,34 @@ class MyGridLayout(GridLayout):
             print("No Database data exists... Opening Rescan...")
             self.rescan_press(self)
 
-        # Call grid layout constructor
-        super(MyGridLayout, self).__init__(**kwargs)
+        # Initialize ts selector spinner variables
+        self.time_since_last_access_fltr_lower_selector_str = self.date_selector_default
+        self.time_since_last_access_fltr_upper_selector_str = self.date_selector_default
+        self.file_age_fltr_lower_selector_str = self.date_selector_default
+        self.file_age_fltr_upper_selector_str = self.date_selector_default
+        self.last_modify_time_unix_fltr_lower_selector_str = self.date_selector_default
+        self.last_modify_time_unix_fltr_upper_selector_str = self.date_selector_default
 
-        # Set Columns
-        self.cols = 3
-
-        # *****Add Widget: time_since_last_access_fltr_lower*****
-        # Add Label
-        self.add_widget(Label(text="Minimum Time Since Last Access: ", size_hint=(None, None), height=self.col_height))
-
-        # Add Input Box
-        self.time_since_last_access_fltr_lower = TextInput(multiline=False, size_hint=(None, None), height=self.col_height)
-        self.add_widget(self.time_since_last_access_fltr_lower)
-
-        # *****Time Selector*****
-        # Create DropDown Type
-        self.time_since_last_access_fltr_lower_selector_dd = DropDown()
-
-        # Loop through the date selector list
-        for i in self.date_selector_lst:
-            # Adding button in drop down list
-            btn = Button(text=i[0], size_hint_y=None, height=self.col_height)
-
-            # binding the button to show the text when selected
-            btn.bind(on_release=lambda btn: self.time_since_last_access_fltr_lower_selector_dd.select(btn.text))
-
-            # then add the button inside the dropdown
-            self.time_since_last_access_fltr_lower_selector_dd.add_widget(btn)
-        self.time_since_last_access_fltr_lower_selector_main = Button(text=self.date_selector_default, size_hint=(None, None), height=50, pos_hint=(.33, .25))
-        self.time_since_last_access_fltr_lower_selector_main.bind(on_release=self.time_since_last_access_fltr_lower_selector_dd.open)
-        self.time_since_last_access_fltr_lower_selector_dd.bind(on_select=lambda instance, x: setattr(self.time_since_last_access_fltr_lower_selector_main, 'text', x))
-        self.add_widget(self.time_since_last_access_fltr_lower_selector_main)
-        # /*****Time Selector*****
-        # /*****Add Widget: time_since_last_access_fltr_lower*****
-
-        # *****Add Widget: time_since_last_access_fltr_upper*****
-        # Add Label
-        self.add_widget(Label(text="Maximum Time Since Last Access: ", size_hint=(None, None), height=self.col_height))
-
-        # Add Input Box
-        self.time_since_last_access_fltr_upper = TextInput(multiline=False, size_hint=(None, None), height=self.col_height)
-        self.add_widget(self.time_since_last_access_fltr_upper)
-
-        # *****Time Selector*****
-        # Create DropDown Type
-        self.time_since_last_access_fltr_upper_dd = DropDown()
-
-        # Loop through the date selector list
-        for i in self.date_selector_lst:
-            # Adding button in drop down list
-            btn = Button(text=i[0], size_hint_y=None, height=self.col_height)
-
-            # binding the button to show the text when selected
-            btn.bind(on_release=lambda btn: self.time_since_last_access_fltr_upper_dd.select(btn.text))
-
-            # then add the button inside the dropdown
-            self.time_since_last_access_fltr_upper_dd.add_widget(btn)
-        self.time_since_last_access_fltr_upper_selector_main = Button(text=self.date_selector_default, size_hint=(None, None), height=50, pos_hint=(.33, .25))
-        self.time_since_last_access_fltr_upper_selector_main.bind(on_release=self.time_since_last_access_fltr_upper_dd.open)
-        self.time_since_last_access_fltr_upper_dd.bind(on_select=lambda instance, x: setattr(self.time_since_last_access_fltr_upper_selector_main, 'text', x))
-        self.add_widget(self.time_since_last_access_fltr_upper_selector_main)
-        # /*****Time Selector*****
-        # /*****Add Widget: time_since_last_access_fltr_upper*****
-
-        # *****Add Widget: file_age_fltr_lower*****
-        # Add Label
-        self.add_widget(Label(text="Minimum File Age: ", size_hint=(None, None), height=self.col_height))
-
-        # Add Input Box
-        self.file_age_fltr_lower = TextInput(multiline=False, size_hint=(None, None), height=self.col_height)
-        self.add_widget(self.file_age_fltr_lower)
-
-        # *****Time Selector*****
-        # Create DropDown Type
-        self.file_age_fltr_lower_dd = DropDown()
-
-        # Loop through the date selector list
-        for i in self.date_selector_lst:
-            # Adding button in drop down list
-            btn = Button(text=i[0], size_hint_y=None, height=self.col_height)
-
-            # binding the button to show the text when selected
-            btn.bind(on_release=lambda btn: self.file_age_fltr_lower_dd.select(btn.text))
-
-            # then add the button inside the dropdown
-            self.file_age_fltr_lower_dd.add_widget(btn)
-        self.file_age_fltr_lower_selector_main = Button(text=self.date_selector_default, size_hint=(None, None), height=50, pos_hint=(.33, .25))
-        self.file_age_fltr_lower_selector_main.bind(on_release=self.file_age_fltr_lower_dd.open)
-        self.file_age_fltr_lower_dd.bind(on_select=lambda instance, x: setattr(self.file_age_fltr_lower_selector_main, 'text', x))
-        self.add_widget(self.file_age_fltr_lower_selector_main)
-        # /*****Time Selector*****
-        # /*****Add Widget: file_age_fltr_lower*****
-
-        # *****Add Widget: file_age_fltr_upper*****
-        # Add Label
-        self.add_widget(Label(text="Maximum File Age: ", size_hint=(None, None), height=self.col_height))
-
-        # Add Input Box
-        self.file_age_fltr_upper = TextInput(multiline=False, size_hint=(None, None), height=self.col_height)
-        self.add_widget(self.file_age_fltr_upper)
-
-        # *****Time Selector*****
-        # Create DropDown Type
-        self.file_age_fltr_upper_dd = DropDown()
-
-        # Loop through the date selector list
-        for i in self.date_selector_lst:
-            # Adding button in drop down list
-            btn = Button(text=i[0], size_hint_y=None, height=self.col_height)
-
-            # binding the button to show the text when selected
-            btn.bind(on_release=lambda btn: self.file_age_fltr_upper_dd.select(btn.text))
-
-            # then add the button inside the dropdown
-            self.file_age_fltr_upper_dd.add_widget(btn)
-        self.file_age_fltr_upper_selector_main = Button(text=self.date_selector_default, size_hint=(None, None), height=50, pos_hint=(.33, .25))
-        self.file_age_fltr_upper_selector_main.bind(on_release=self.file_age_fltr_upper_dd.open)
-        self.file_age_fltr_upper_dd.bind(on_select=lambda instance, x: setattr(self.file_age_fltr_upper_selector_main, 'text', x))
-        self.add_widget(self.file_age_fltr_upper_selector_main)
-        # /*****Time Selector*****
-        # /*****Add Widget: file_age_fltr_upper*****
-
-        # *****Add Widget: last_modify_time_unix_fltr_lower*****
-        # Add Label
-        self.add_widget(Label(text="Minimum Time Since Last Modify: ", size_hint=(None, None), height=self.col_height))
-
-        # Add Input Box
-        self.last_modify_time_unix_fltr_lower = TextInput(multiline=False, size_hint=(None, None), height=self.col_height)
-        self.add_widget(self.last_modify_time_unix_fltr_lower)
-
-        # *****Time Selector*****
-        # Create DropDown Type
-        self.last_modify_time_unix_fltr_lower_dd = DropDown()
-
-        # Loop through the date selector list
-        for i in self.date_selector_lst:
-            # Adding button in drop down list
-            btn = Button(text=i[0], size_hint_y=None, height=self.col_height)
-
-            # binding the button to show the text when selected
-            btn.bind(on_release=lambda btn: self.last_modify_time_unix_fltr_lower_dd.select(btn.text))
-
-            # then add the button inside the dropdown
-            self.last_modify_time_unix_fltr_lower_dd.add_widget(btn)
-        self.last_modify_time_unix_fltr_lower_selector_main = Button(text=self.date_selector_default, size_hint=(None, None), height=50, pos_hint=(.33, .25))
-        self.last_modify_time_unix_fltr_lower_selector_main.bind(on_release=self.last_modify_time_unix_fltr_lower_dd.open)
-        self.last_modify_time_unix_fltr_lower_dd.bind(on_select=lambda instance, x: setattr(self.last_modify_time_unix_fltr_lower_selector_main, 'text', x))
-        self.add_widget(self.last_modify_time_unix_fltr_lower_selector_main)
-        # /*****Time Selector*****
-        # /*****Add Widget: last_modify_time_unix_fltr_lower*****
-
-        # *****Add Widget: last_modify_time_unix_fltr_upper*****
-        # Add Label
-        self.add_widget(Label(text="Maximum Time Since Last Modify: ", size_hint=(None, None), height=self.col_height))
-
-        # Add Input Box
-        self.last_modify_time_unix_fltr_upper = TextInput(multiline=False, size_hint=(None, None), height=self.col_height)
-        self.add_widget(self.last_modify_time_unix_fltr_upper)
-
-        # *****Time Selector*****
-        # Create DropDown Type
-        self.last_modify_time_unix_fltr_upper_dd = DropDown()
-
-        # Loop through the date selector list
-        for i in self.date_selector_lst:
-            # Adding button in drop down list
-            btn = Button(text=i[0], size_hint_y=None, height=self.col_height)
-
-            # binding the button to show the text when selected
-            btn.bind(on_release=lambda btn: self.last_modify_time_unix_fltr_upper_dd.select(btn.text))
-
-            # then add the button inside the dropdown
-            self.last_modify_time_unix_fltr_upper_dd.add_widget(btn)
-        self.last_modify_time_unix_fltr_upper_selector_main = Button(text=self.date_selector_default, size_hint=(None, None), height=50, pos_hint=(.33, .25))
-        self.last_modify_time_unix_fltr_upper_selector_main.bind(on_release=self.last_modify_time_unix_fltr_upper_dd.open)
-        self.last_modify_time_unix_fltr_upper_dd.bind(on_select=lambda instance, x: setattr(self.last_modify_time_unix_fltr_upper_selector_main, 'text', x))
-        self.add_widget(self.last_modify_time_unix_fltr_upper_selector_main)
-        # /*****Time Selector*****
-        # /*****Add Widget: last_modify_time_unix_fltr_upper*****
-
-        # *****Create Rescan Button*****
-        # Create Submit Button
-        self.submit = Button(text="Rescan", font_size=32, size_hint=(None, None), height=self.col_height)
-
-        # Bind Button
-        self.submit.bind(on_release=self.rescan_press)
-        self.add_widget(self.submit)
-        # /*****Create Rescan Button*****
-
-        # *****Create Submit Button*****
-        # Create Submit Button
-        self.submit = Button(text="Submit", font_size=32, size_hint=(None, None), height=self.col_height)
-
-        # Bind Button
-        self.submit.bind(on_release=self.slicer_press)
-        self.add_widget(self.submit)
-        # /*****Create Submit Button*****
-
-        # *****Create Download Button*****
-        # Create Download Button
-        self.submit = Button(text="Download CSV", font_size=32, size_hint=(None, None), height=self.col_height)
-
-        # Bind Button
-        self.submit.bind(on_press=self.download_press)
-        self.add_widget(self.submit)
-        # /*****Create Download Button*****
+    def spinner_time_type_clicked(self, ts_type, fltr_varible):
+        print(ts_type)
+        print(fltr_varible)
+        # *****Save Data from spinner to appropriate variable*****
+        if fltr_varible == "time_since_last_access_fltr_lower_selector":
+            self.time_since_last_access_fltr_lower_selector_str = ts_type
+        if fltr_varible == "time_since_last_access_fltr_upper_selector":
+            self.time_since_last_access_fltr_upper_selector_str = ts_type
+        if fltr_varible == "file_age_fltr_lower_selector":
+            self.file_age_fltr_lower_selector_str = ts_type
+        if fltr_varible == "file_age_fltr_upper_selector":
+            self.file_age_fltr_upper_selector_str = ts_type
+        if fltr_varible == "last_modify_time_unix_fltr_lower_selector":
+            self.last_modify_time_unix_fltr_lower_selector_str = ts_type
+        if fltr_varible == "last_modify_time_unix_fltr_upper_selector":
+            self.last_modify_time_unix_fltr_upper_selector_str = ts_type
+        # /*****Save Data from spinner to appropriate variable*****
 
     # Make rescan function
-    def rescan_press(self, instance):
+    def rescan_press(self):
         root = Tk()
         root.withdraw()
 
@@ -367,27 +196,6 @@ class MyGridLayout(GridLayout):
                              multithread=self.multithread_tf,
                              db_path=self.db_path)
 
-    # Make Dropdown Selector for Dates
-    def drop_down_time_selector(self):
-        # Create DropDown Type
-        dropdown = DropDown()
-
-        # Loop through the date selector list
-        for i in self.date_selector_lst:
-            # Adding button in drop down list
-            btn = Button(text=i[0], size_hint_y=None, height=40)
-
-            # binding the button to show the text when selected
-            btn.bind(on_release=lambda btn: dropdown.select(btn.text))
-
-            # then add the button inside the dropdown
-            dropdown.add_widget(btn)
-        mainbutton = Button(text='Select Type', size_hint=(None, None), pos=(350, 300))
-        mainbutton.bind(on_release=dropdown.open)
-        dropdown.bind(on_select=lambda instance, x: setattr(mainbutton, 'text', x))
-
-        return mainbutton
-
     def lookup_time_selector_multiplier(self, selector_text_in):
         # Lookup timestamp multiplier
         for i in self.date_selector_lst:
@@ -398,7 +206,7 @@ class MyGridLayout(GridLayout):
         return 1
 
     # Define Submit Slicer Button
-    def slicer_press(self, instance):
+    def slicer_press(self):
         # Text Box Inputs
         time_since_last_access_fltr_lower = self.time_since_last_access_fltr_lower.text
         time_since_last_access_fltr_upper = self.time_since_last_access_fltr_upper.text
@@ -407,21 +215,13 @@ class MyGridLayout(GridLayout):
         last_modify_time_unix_fltr_lower = self.last_modify_time_unix_fltr_lower.text
         last_modify_time_unix_fltr_upper = self.last_modify_time_unix_fltr_upper.text
 
-        # Drop Down Selector
-        time_since_last_access_fltr_lower_selector_str = self.time_since_last_access_fltr_lower_selector_main.text
-        time_since_last_access_fltr_upper_selector_str = self.time_since_last_access_fltr_upper_selector_main.text
-        file_age_fltr_lower_selector_str = self.file_age_fltr_lower_selector_main.text
-        file_age_fltr_upper_selector_str = self.file_age_fltr_upper_selector_main.text
-        last_modify_time_unix_fltr_lower_selector_str = self.last_modify_time_unix_fltr_lower_selector_main.text
-        last_modify_time_unix_fltr_upper_selector_str = self.last_modify_time_unix_fltr_upper_selector_main.text
-
         filter_tpl_lst = [
-            ("time_since_last_access_fltr_lower_ts", time_since_last_access_fltr_lower, '"time_since_last_access"', self.lookup_time_selector_multiplier(selector_text_in=time_since_last_access_fltr_lower_selector_str)),
-            ("time_since_last_access_fltr_upper_ts", time_since_last_access_fltr_upper, '"time_since_last_access"', self.lookup_time_selector_multiplier(selector_text_in=time_since_last_access_fltr_upper_selector_str)),
-            ("file_age_fltr_lower_ts", file_age_fltr_lower, '"file_age"', self.lookup_time_selector_multiplier(selector_text_in=file_age_fltr_lower_selector_str)),
-            ("file_age_fltr_upper_ts", file_age_fltr_upper, '"file_age"', self.lookup_time_selector_multiplier(selector_text_in=file_age_fltr_upper_selector_str)),
-            ("time_since_last_modify_time_unix_fltr_lower_ts", last_modify_time_unix_fltr_lower, '"time_since_last_modify"', self.lookup_time_selector_multiplier(selector_text_in=last_modify_time_unix_fltr_lower_selector_str)),
-            ("time_since_last_modify_time_unix_fltr_upper_ts", last_modify_time_unix_fltr_upper, '"time_since_last_modify"', self.lookup_time_selector_multiplier(selector_text_in=last_modify_time_unix_fltr_upper_selector_str))
+            ("time_since_last_access_fltr_lower_ts", time_since_last_access_fltr_lower, '"time_since_last_access"', self.lookup_time_selector_multiplier(selector_text_in=self.time_since_last_access_fltr_lower_selector_str)),
+            ("time_since_last_access_fltr_upper_ts", time_since_last_access_fltr_upper, '"time_since_last_access"', self.lookup_time_selector_multiplier(selector_text_in=self.time_since_last_access_fltr_upper_selector_str)),
+            ("file_age_fltr_lower_ts", file_age_fltr_lower, '"file_age"', self.lookup_time_selector_multiplier(selector_text_in=self.file_age_fltr_lower_selector_str)),
+            ("file_age_fltr_upper_ts", file_age_fltr_upper, '"file_age"', self.lookup_time_selector_multiplier(selector_text_in=self.file_age_fltr_upper_selector_str)),
+            ("time_since_last_modify_time_unix_fltr_lower_ts", last_modify_time_unix_fltr_lower, '"time_since_last_modify"', self.lookup_time_selector_multiplier(selector_text_in=self.last_modify_time_unix_fltr_lower_selector_str)),
+            ("time_since_last_modify_time_unix_fltr_upper_ts", last_modify_time_unix_fltr_upper, '"time_since_last_modify"', self.lookup_time_selector_multiplier(selector_text_in=self.last_modify_time_unix_fltr_upper_selector_str))
         ]
 
         # print(self.lookup_time_selector_multiplier(selector_text_in=time_since_last_access_fltr_lower_selector_str))
@@ -430,7 +230,7 @@ class MyGridLayout(GridLayout):
         query = create_sql_query(filter_tpl_lst=filter_tpl_lst, tbl_in=self.tbl_in)
 
         # Print Sql Statement
-        print(query)
+        print(filter_tpl_lst)
         # self.add_widget(Label(text=f'{query}'))
 
         # Query Data
@@ -440,7 +240,7 @@ class MyGridLayout(GridLayout):
         print(self.data.head(100))
 
     # Define Download Button
-    def download_press(self, instance):
+    def download_press(self):
         # Get Download location
         file_out_loc = select_file_out_csv(file_in=pathlib.Path().resolve())
 
