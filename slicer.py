@@ -215,6 +215,8 @@ class MyGridLayout(Widget):
         last_modify_time_unix_fltr_lower = self.last_modify_time_unix_fltr_lower.text
         last_modify_time_unix_fltr_upper = self.last_modify_time_unix_fltr_upper.text
 
+        # Make list of tuples that has all of the filter information for each filtered item.
+        # Variable name, Value, Column Name, Timestamp modifier
         filter_tpl_lst = [
             ("time_since_last_access_fltr_lower_ts", time_since_last_access_fltr_lower, '"time_since_last_access"', self.lookup_time_selector_multiplier(selector_text_in=self.time_since_last_access_fltr_lower_selector_str)),
             ("time_since_last_access_fltr_upper_ts", time_since_last_access_fltr_upper, '"time_since_last_access"', self.lookup_time_selector_multiplier(selector_text_in=self.time_since_last_access_fltr_upper_selector_str)),
@@ -224,13 +226,11 @@ class MyGridLayout(Widget):
             ("time_since_last_modify_time_unix_fltr_upper_ts", last_modify_time_unix_fltr_upper, '"time_since_last_modify"', self.lookup_time_selector_multiplier(selector_text_in=self.last_modify_time_unix_fltr_upper_selector_str))
         ]
 
-        # print(self.lookup_time_selector_multiplier(selector_text_in=time_since_last_access_fltr_lower_selector_str))
-
         # Create Sql Query
         query = create_sql_query(filter_tpl_lst=filter_tpl_lst, tbl_in=self.tbl_in)
 
         # Print Sql Statement
-        print(filter_tpl_lst)
+        print(query)
         # self.add_widget(Label(text=f'{query}'))
 
         # Query Data

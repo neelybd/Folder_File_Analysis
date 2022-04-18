@@ -32,95 +32,109 @@
 
             Label:
                 text: "Minimum Time Since Last Access: "
-                font_size: 28
+                font_size: self.width/20
             TextInput:
                 id: time_since_last_access_fltr_lower
                 multiline: False
-                font_size: 28
+                font_size: self.height / 2
+                padding_y: [self.height / 2.0 - (self.line_height / 2.0) * len(self._lines), 0]
             Spinner:
                 id: time_since_last_access_fltr_lower_selector
                 text: 'Year'
+                font_size: self.width/20
                 values: ["Seconds", "Minutes", "Hours", "Days", "Months", "Years"]
                 on_text: root.spinner_time_type_clicked(time_since_last_access_fltr_lower_selector.text, "time_since_last_access_fltr_lower_selector")
 
             Label:
                 text: "Maximum Time Since Last Access: "
-                font_size: 28
+                font_size: self.width/20
             TextInput:
                 id: time_since_last_access_fltr_upper
                 multiline: False
-                font_size: 28
+                font_size: self.height / 2
+                padding_y: [self.height / 2.0 - (self.line_height / 2.0) * len(self._lines), 0]
             Spinner:
                 id: time_since_last_access_fltr_upper_selector
                 text: 'Year'
+                font_size: self.width/20
                 values: ["Seconds", "Minutes", "Hours", "Days", "Months", "Years"]
                 on_text: root.spinner_time_type_clicked(time_since_last_access_fltr_upper_selector.text, "time_since_last_access_fltr_upper_selector")
 
             Label:
                 text: "Minimum File Age: "
-                font_size: 28
+                font_size: self.width/20
             TextInput:
                 id: file_age_fltr_lower
                 multiline: False
-                font_size: 28
+                font_size: self.height / 2
+                padding_y: [self.height / 2.0 - (self.line_height / 2.0) * len(self._lines), 0]
             Spinner:
                 id: file_age_fltr_lower_selector
                 text: 'Year'
+                font_size: self.width/20
                 values: ["Seconds", "Minutes", "Hours", "Days", "Months", "Years"]
                 on_text: root.spinner_time_type_clicked(file_age_fltr_lower_selector.text, "file_age_fltr_lower_selector")
 
             Label:
                 text: "Maximum File Age: "
-                font_size: 28
+                font_size: self.width/20
             TextInput:
                 id: file_age_fltr_upper
                 multiline: False
-                font_size: 28
+                font_size: self.height / 2
+                padding_y: [self.height / 2.0 - (self.line_height / 2.0) * len(self._lines), 0]
             Spinner:
                 id: file_age_fltr_upper_selector
                 text: 'Year'
+                font_size: self.width/20
                 values: ["Seconds", "Minutes", "Hours", "Days", "Months", "Years"]
                 on_text: root.spinner_time_type_clicked(file_age_fltr_upper_selector.text, "file_age_fltr_upper_selector")
 
             Label:
                 text: "Minimum Time Since Last Modify: "
-                font_size: 28
+                font_size: self.width/20
             TextInput:
                 id: last_modify_time_unix_fltr_lower
                 multiline: False
-                font_size: 28
+                font_size: self.height / 2
+                padding_y: [self.height / 2.0 - (self.line_height / 2.0) * len(self._lines), 0]
             Spinner:
                 id: last_modify_time_unix_fltr_lower_selector
                 text: 'Year'
+                font_size: self.width/20
                 values: ["Seconds", "Minutes", "Hours", "Days", "Months", "Years"]
                 on_text: root.spinner_time_type_clicked(last_modify_time_unix_fltr_lower_selector.text, "last_modify_time_unix_fltr_lower_selector")
 
             Label:
                 text: "Maximum Time Since Last Modify: "
-                font_size: 28
+                font_size: self.width/20
             TextInput:
                 id: last_modify_time_unix_fltr_upper
                 multiline: False
-                font_size: 28
+                font_size: self.height / 2
+                padding_y: [self.height / 2.0 - (self.line_height / 2.0) * len(self._lines), 0]
             Spinner:
                 id: last_modify_time_unix_fltr_upper_selector
                 text: 'Year'
+                font_size: self.width/20
                 values: ["Seconds", "Minutes", "Hours", "Days", "Months", "Years"]
                 on_text: root.spinner_time_type_clicked(last_modify_time_unix_fltr_upper_selector.text, "last_modify_time_unix_fltr_upper_selector")
 
-        GridLayout
+        GridLayout:
             cols:3
+            size: root.width, root.height * 0.25
+
             Button:
-                text: "rescan_press"
-                font_size: 28
+                text: "Rescan Files"
+                font_size: self.width/20
                 on_press: root.rescan_press()
 
             Button:
                 text: "Submit"
-                font_size: 28
+                font_size: self.width/20
                 on_press: root.slicer_press()
 
             Button:
                 text: "Download"
-                font_size: 28
+                font_size: self.width/20
                 on_press: root.download_press()
