@@ -27,7 +27,7 @@ from folder_file_analysis_functions import *
 # last_access_time_unix
 
 print("Program: Folder_File_Analysis - Slicer")
-print("Release: 1.4.2")
+print("Release: 1.5.0")
 print("Date: 2022-04-18")
 print("Author: Brian Neely")
 print()
@@ -162,7 +162,7 @@ class MyGridLayout(Widget):
             pd.read_sql_query(query, con=self.conn)
         except pandas.io.sql.DatabaseError:
             print("No Database data exists... Opening Rescan...")
-            self.rescan_press(self)
+            self.rescan_press()
 
         # Initialize ts selector spinner variables
         self.time_since_last_access_fltr_lower_selector_str = self.date_selector_default
