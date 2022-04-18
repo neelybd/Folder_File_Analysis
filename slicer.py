@@ -26,6 +26,16 @@ from folder_file_analysis_functions import *
 # last_modify_time_unix
 # last_access_time_unix
 
+print("Program: Folder_File_Analysis - Slicer")
+print("Release: 1.4.2")
+print("Date: 2022-04-18")
+print("Author: Brian Neely")
+print()
+print()
+print("A program that that analyzes a directory of files and folders its metadata.")
+print()
+print()
+
 
 def create_sql_query(filter_tpl_lst, tbl_in):
     # Make Sql Query Base
