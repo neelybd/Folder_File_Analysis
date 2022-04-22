@@ -27,8 +27,8 @@ from folder_file_analysis_functions import *
 # last_access_time_unix
 
 print("Program: Folder_File_Analysis - Slicer")
-print("Release: 1.5.0")
-print("Date: 2022-04-18")
+print("Release: 1.5.1")
+print("Date: 2022-04-22")
 print("Author: Brian Neely")
 print()
 print()
@@ -197,8 +197,14 @@ class MyGridLayout(Widget):
 
         # Select Folder Location
         rescan_loc = tkFileDialog.askdirectory()
+        print("Rescan Location: " + rescan_loc)
+
+        # If rescan location is blank, end
+        if not rescan_loc:
+            print("No rescan location...")
+            return False
+
         file_scn_pth_lst = [rescan_loc]
-        print(rescan_loc)
 
         # Run folder file analysis for rescan
         folder_file_analysis(file_scn_pth_lst=file_scn_pth_lst,
