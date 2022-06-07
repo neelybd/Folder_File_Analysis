@@ -14,9 +14,16 @@ from kivy.uix.dropdown import DropDown
 from kivy.uix.widget import Widget
 from kivy.base import runTouchApp
 from kivy.properties import ObjectProperty
+from kivy.metrics import dp
+from kivymd.app import MDApp
+from kivymd.uix.screen import Screen
+from kivymd.uix.datatables import MDDataTable
 import pathlib
 from tkinter import filedialog as tkFileDialog
 from folder_file_analysis_functions import *
+from kivy_deps import sdl2, glew
+import os, sys
+from kivy.resources import resource_add_path, resource_find
 
 
 # Column List
@@ -119,7 +126,6 @@ class CustomDropDown(DropDown):
 
 
 class MyGridLayout(Widget):
-
     # Initialize
     def __init__(self, *args, **kwargs):
         super(MyGridLayout, self).__init__(*args, **kwargs)
@@ -255,6 +261,30 @@ class MyGridLayout(Widget):
         # Print Head
         print(self.data.head(100))
 
+        # Run dataframe viewer
+        # self.df_viewer()
+
+    # Create Dataframe Viewer
+    def df_viewer(self):
+        # Start Screen
+        screen = Screen()
+
+        # Define table
+        table = MDDataTable(
+            column_data=[
+                ("file_path", dp(30)),
+                (" file_name_ext", dp(30)),
+                (" time_since_last_access_str", dp(30)),
+                (" time_since_last_modify_str", dp(30)),
+                (" create_time", dp(30)),
+                (" file_age_str", dp(30))
+            ]
+        )
+
+        # Add to screen
+        screen.add_widget(table)
+        return screen
+
     # Define Download Button
     def download_press(self):
         # Get Download location
@@ -275,4 +305,7 @@ class MyApp(App):
 
 
 if __name__ == '__main__':
+    if __name__ == '__main__':
+        if hasattr(sys, '_MEIPASS'):
+            resource_add_path(os.path.join(sys._MEIPASS))
     MyApp().run()
